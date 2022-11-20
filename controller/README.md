@@ -1,7 +1,7 @@
 Backend.
 <br>
 - (Will) Exposes an HTTP API which enables/disables queries (See tweet search API,q param)
-- Fetches data periodically and outputs csv files to `/tmp/{query}/{timestamp}.csv`
+- Fetches data periodically and outputs csv files to `/tmp/{query}/{timestamp}.csv` (see example in repo)
 - Sends the csv files to hadoop
 - Syncs HDFS
 - Is notified when Hadoop Job exits
