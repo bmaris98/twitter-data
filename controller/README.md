@@ -3,8 +3,8 @@ Set TWITTER_BEARER to bearer token from Twitter Dev Api. The VAR is mentioned in
 
 ## Run locally
 
-`go mod tidy`
-`go build`
+`go mod tidy` <br>
+`go build` <br>
 `./controller` or open exe on win
 
 ## Docker
