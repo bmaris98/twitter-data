@@ -4,4 +4,4 @@
 
 [Tweet search api](https://developer.twitter.com/en/docs/twitter-api/v1/tweets/search/api-reference/get-search-tweets)
 
-[Go HDFS Package] (https://pkg.go.dev/github.com/colinmarc/hdfs)
+[Go HDFS Package](https://pkg.go.dev/github.com/colinmarc/hdfs)
