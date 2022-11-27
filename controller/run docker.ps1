@@ -1,0 +1,1 @@
+docker run -l twitter-controller --env-file env.list twitter-controller

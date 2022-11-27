@@ -61,7 +61,6 @@ var nullptr void
 
 func main() {
 	client := &http.Client{}
-
 	active_queries := make(map[string]void)
 	active_queries["%23elections"] = nullptr
 
