@@ -1,1 +1,1 @@
-docker run --network=twitter-net -p 8080:8080 -l twitter-controller --env-file env.list twitter-controller
+docker run -d --name twitter-server --network=twitter-net -p 8080:8080 -l twitter-controller --env-file env.list twitter-controller
