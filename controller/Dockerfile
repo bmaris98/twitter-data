@@ -12,6 +12,6 @@ COPY *.go ./
 
 RUN go build -o /controller
 
-EXPOSE 8080
+EXPOSE 5321
 
 CMD [ "./controller" ]
