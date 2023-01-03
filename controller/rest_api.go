@@ -4,11 +4,20 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func SpawnServer() {
 	router := gin.Default()
+
+	config := cors.Config{
+		AllowAllOrigins: true,
+		AllowMethods:    []string{"GET", "PATCH", "POST"},
+	}
+
+	router.Use(cors.New(config))
+
 	router.GET("/prompts", getAllPrompts)
 	router.POST("/prompts", createPrompt)
 	router.PATCH("/prompts/toggle", togglePrompt)

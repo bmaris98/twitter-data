@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/bbalet/stopwords v1.0.0
+	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-gonic/gin v1.8.1
 	github.com/segmentio/kafka-go v0.4.38
 	go.mongodb.org/mongo-driver v1.11.0
