@@ -12,10 +12,12 @@ import (
 
 var mongoCtx MongoContext = MongoContext{}
 var kafkaCtx KafkaContext = KafkaContext{}
+var hdfsConn HdfsConnection = HdfsConnection{}
 
 func main() {
 	mongoCtx.InitMongo()
 	kafkaCtx.Init(mongoCtx)
+	hdfsConn.Init()
 	go kafkaCtx.StartReading()
 
 	sigs := make(chan os.Signal, 1)
@@ -37,7 +39,7 @@ func main() {
 		for _, prompt := range prompts {
 			if prompt.IsActive {
 				log.Printf("Running query '%s' with last read '%f'", prompt.Query, prompt.LastIdRead)
-				lastReadId := RunQuery(prompt.Query, prompt.LastIdRead, client, kafkaCtx)
+				lastReadId := RunQuery(prompt.Query, prompt.LastIdRead, client, kafkaCtx, hdfsConn)
 				mongoCtx.UpdatePromptLastRead(prompt.Query, lastReadId)
 			}
 		}

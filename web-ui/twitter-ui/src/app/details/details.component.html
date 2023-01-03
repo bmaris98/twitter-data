@@ -1,0 +1,15 @@
+<h1>Details for <strong>{{query}}</strong></h1>
+
+<ng-template [ngIf]="hasUnsafeStats">
+  <hr>
+  <h2>Unsafe words</h2>
+  <div style="display: block;">
+    <canvas baseChart width="400" height="300"
+      [type]="'line'"
+      [data]="lineChartData"
+      [options]="lineChartOptions"
+      [legend]="lineChartLegend">
+    </canvas>
+  </div>
+</ng-template>
+
