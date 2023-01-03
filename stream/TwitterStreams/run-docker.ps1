@@ -1,0 +1,1 @@
+docker run -d --name twitter-streams --network=twitter-net -l twitter-streams twitter-streams

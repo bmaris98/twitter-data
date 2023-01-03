@@ -12,9 +12,10 @@ import (
 var database = "twitter_data"
 
 type MongoContext struct {
-	Ctx     context.Context
-	Client  *mongo.Client
-	Prompts *mongo.Collection
+	Ctx         context.Context
+	Client      *mongo.Client
+	Prompts     *mongo.Collection
+	UnsafeStats *mongo.Collection
 }
 
 type Prompt struct {
@@ -23,8 +24,15 @@ type Prompt struct {
 	LastIdRead float64 `bson:"last_id_read" json:"lastIdRead"`
 }
 
+type Stat struct {
+	Query     string `bson:"query" json:"query"`
+	Timestamp uint64 `bson:"timestamp" json:"timestamp"`
+	Value     uint64 `bson:"value" json:"value"`
+}
+
 func (mongoCtx *MongoContext) InitMongo() {
 	auth := "mongodb://mongoadmin:admin@twitter-mongo-host:27017/?serverSelectionTimeoutMS=5000&connectTimeoutMS=10000&authSource=admin&authMechanism=SCRAM-SHA-256"
+	// auth := "mongodb://mongoadmin:admin@localhost:27017/?serverSelectionTimeoutMS=5000&connectTimeoutMS=10000&authSource=admin&authMechanism=SCRAM-SHA-256"
 	clientOptions := options.Client().ApplyURI(auth)
 	mongoCtx.Ctx = context.TODO()
 	client, err := mongo.Connect(mongoCtx.Ctx, clientOptions)
@@ -34,7 +42,7 @@ func (mongoCtx *MongoContext) InitMongo() {
 	mongoCtx.Client = client
 
 	mongoCtx.Prompts = mongoCtx.Client.Database(database).Collection("prompts")
-	log.Println(mongoCtx.Prompts)
+	mongoCtx.UnsafeStats = mongoCtx.Client.Database(database).Collection("unsafe_stats")
 }
 
 func (mongoCtx MongoContext) AddPrompt(p Prompt) {
@@ -66,7 +74,6 @@ func (mongoCtx MongoContext) UpdatePromptLastRead(prompt string, lastRead float6
 
 func (mongoCtx MongoContext) FindOne(id string) Prompt {
 	filter := bson.M{"_id": id}
-	log.Println(id)
 	var result Prompt
 	response := mongoCtx.Prompts.FindOne(context.TODO(), filter)
 	err := response.Err()
@@ -101,6 +108,30 @@ func (mongoCtx MongoContext) GetAllPrompts() []Prompt {
 func (mongoCtx MongoContext) InsertPrompt(p Prompt) {
 	doc := bson.M{"_id": p.Query, "is_active": false, "last_id_read": 0}
 	_, err := mongoCtx.Prompts.InsertOne(mongoCtx.Ctx, doc)
+
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (mongoCtx MongoContext) ReadAllUnsafeStats(query string) []Stat {
+	filter := bson.M{"query": query}
+	cursor, err := mongoCtx.UnsafeStats.Find(mongoCtx.Ctx, filter)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var stats []Stat
+
+	if err = cursor.All(context.TODO(), &stats); err != nil {
+		log.Fatal(err)
+	}
+	return stats
+}
+
+func (mongoCtx MongoContext) InsertUnsafeStat(s Stat) {
+	doc := bson.M{"query": s.Query, "timestamp": s.Timestamp, "value": s.Value}
+	_, err := mongoCtx.UnsafeStats.InsertOne(mongoCtx.Ctx, doc)
 
 	if err != nil {
 		panic(err)

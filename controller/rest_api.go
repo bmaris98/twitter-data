@@ -12,6 +12,7 @@ func SpawnServer() {
 	router.GET("/prompts", getAllPrompts)
 	router.POST("/prompts", createPrompt)
 	router.PATCH("/prompts/toggle", togglePrompt)
+	router.GET("/stats/unsafe/:query", getUnsafeStats)
 
 	router.Run("0.0.0.0:5321")
 }
@@ -19,6 +20,12 @@ func SpawnServer() {
 func getAllPrompts(c *gin.Context) {
 	prompts := mongoCtx.GetAllPrompts()
 	c.IndentedJSON(http.StatusOK, prompts)
+}
+
+func getUnsafeStats(c *gin.Context) {
+	query := c.Param("query")
+	stats := mongoCtx.ReadAllUnsafeStats(query)
+	c.IndentedJSON(http.StatusOK, stats)
 }
 
 func togglePrompt(c *gin.Context) {

@@ -66,7 +66,7 @@ func (data PostData) ToCsv() string {
 	return fmt.Sprintf("%s~|~%s~|~%s", strings.Join(data.Words, ","), strings.Join(data.Mentions, ","), strings.Join(data.ManualTags, ","))
 }
 
-func RunQuery(query string, lastReadId float64, client *http.Client) float64 {
+func RunQuery(query string, lastReadId float64, client *http.Client, kafkaCtx KafkaContext) float64 {
 	// Create a new request using http
 	url := fmt.Sprintf(urlFormat, url.QueryEscape(query))
 	req, err := http.NewRequest("GET", url, nil)
@@ -105,8 +105,6 @@ func RunQuery(query string, lastReadId float64, client *http.Client) float64 {
 		return single.ToCsv()
 	})
 	csv := strings.Join(lines, "\n")
-	//log.Println(csv)
-	// marshalled, err := json.Marshal(postData)
 
 	dirPath := fmt.Sprintf("%s/%s", tmpRoot, query)
 	err = os.MkdirAll(dirPath, 0777)
@@ -114,6 +112,9 @@ func RunQuery(query string, lastReadId float64, client *http.Client) float64 {
 	fileName := fmt.Sprintf("%s/%d.csv", dirPath, time.Now().UnixNano())
 	err = os.WriteFile(fileName, []byte(csv), 0777)
 	Check(err)
+
+	kafkaCtx.PushMsg(query, csv)
+
 	return searchResult.GetMaximumId()
 }
 
