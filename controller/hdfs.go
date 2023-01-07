@@ -49,3 +49,21 @@ func (conn *HdfsConnection) EnsureFolderStructure(structure string) {
 		log.Fatal("Failed to ensure mkdir in hdfs", err)
 	}
 }
+
+func (conn *HdfsConnection) ReadFromFile(query string, id string) string {
+	// "/output/query/id/part-r-00000"
+	file := fmt.Sprintf("/output/%s/%s/part-r-00000", query, id)
+	reader, err := conn.Client.Open(file)
+
+	if err != nil {
+		log.Fatal("error opening hdfs file", err)
+	}
+
+	buffer := make([]byte, 10000)
+	_, err = reader.Read(buffer)
+
+	if err != nil {
+		log.Fatal("error reading from hdfs file", err)
+	}
+	return string(buffer)
+}

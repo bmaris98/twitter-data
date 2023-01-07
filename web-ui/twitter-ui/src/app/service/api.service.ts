@@ -33,8 +33,15 @@ export class ApiService {
     }
 
     getUnsafeDetails(query: string): Observable<Stat[]> {
-        console.log(this.baseUrl + '/stats/unsafe/' + query)
         return this.http.get<Stat[]>(this.baseUrl + '/stats/unsafe/' + encodeURIComponent(query))
+    }
+
+    getReports(query: string): Observable<Report[]> {
+        return this.http.get<Report[]>(this.baseUrl + '/stats/reports/' + encodeURIComponent(query))
+    }
+
+    triggerReport(query: string): Observable<Object> {
+        return this.http.post(this.baseUrl + '/hadoop/run/' + encodeURIComponent(query), {})
     }
 }
 
@@ -48,4 +55,11 @@ export interface Stat {
     query: String,
     value: number,
     timestamp: number
+}
+
+export interface Report {
+    query: string,
+    timestamp: number,
+    data: string,
+    id: string
 }

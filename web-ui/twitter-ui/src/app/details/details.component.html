@@ -3,13 +3,32 @@
 <ng-template [ngIf]="hasUnsafeStats">
   <hr>
   <h2>Unsafe words</h2>
-  <div style="display: block;">
-    <canvas baseChart width="400" height="300"
+  <div style="display: block; width: 100%;">
+    <canvas baseChart width="800" height="300"
       [type]="'line'"
       [data]="lineChartData"
       [options]="lineChartOptions"
       [legend]="lineChartLegend">
     </canvas>
   </div>
+</ng-template>
+
+<ng-template [ngIf]="hasReports">
+  <hr>
+  <h2>Reports</h2>
+  <button mat-raised-button (click)="generateReport()" color="accent">Generate new report</button>
+  <mat-tab-group>
+    <mat-tab [label]="(report.origin.time | date:'short') ?? ''" *ngFor="let report of graphicReports">
+      <div style="display: block; width: 100%;">
+        <canvas baseChart width="1000" height="300"
+          [type]="'bar'"
+          [data]="report.chartData"
+          [options]="reportChartOptions"
+          [legend]=false>
+        </canvas>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+
 </ng-template>
 

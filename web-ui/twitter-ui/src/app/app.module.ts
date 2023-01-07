@@ -6,12 +6,14 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTableModule } from '@angular/material/table';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTabsModule } from '@angular/material/tabs';
 
 
 import { PromptsComponent } from './prompts/prompts.component';
@@ -36,7 +38,9 @@ import { NgChartsModule } from 'ng2-charts'
     FormsModule,
     MatIconModule,
     RouterModule,
-    NgChartsModule
+    NgChartsModule,
+    MatTabsModule,
+    CommonModule
   ],
   providers: [],
   bootstrap: [AppComponent]

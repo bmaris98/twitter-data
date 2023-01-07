@@ -1,0 +1,9 @@
+org\example\PopularTopicsJob$TokenizerMapper.class
+org\example\WordMapper.class
+org\example\CompositeKey.class
+org\example\CompositeKeySorter.class
+org\example\PopularTopicsJob$IntSumReducer.class
+org\example\WordCounter.class
+org\example\PopularTopicsJob.class
+org\example\WordCountSorter.class
+org\example\GroupingMap.class

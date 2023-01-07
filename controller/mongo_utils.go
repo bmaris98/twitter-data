@@ -16,6 +16,7 @@ type MongoContext struct {
 	Client      *mongo.Client
 	Prompts     *mongo.Collection
 	UnsafeStats *mongo.Collection
+	Reports     *mongo.Collection
 }
 
 type Prompt struct {
@@ -28,6 +29,13 @@ type Stat struct {
 	Query     string `bson:"query" json:"query"`
 	Timestamp uint64 `bson:"timestamp" json:"timestamp"`
 	Value     uint64 `bson:"value" json:"value"`
+}
+
+type Report struct {
+	Query     string `bson:"query" json:"query"`
+	Data      string `bson:"data" json:"data"`
+	Id        string `bson:"_id" json:"id"`
+	Timestamp int64  `bson:"timestamp" json:"timestamp"`
 }
 
 func (mongoCtx *MongoContext) InitMongo() {
@@ -43,6 +51,7 @@ func (mongoCtx *MongoContext) InitMongo() {
 
 	mongoCtx.Prompts = mongoCtx.Client.Database(database).Collection("prompts")
 	mongoCtx.UnsafeStats = mongoCtx.Client.Database(database).Collection("unsafe_stats")
+	mongoCtx.Reports = mongoCtx.Client.Database(database).Collection("reports")
 }
 
 func (mongoCtx MongoContext) AddPrompt(p Prompt) {
@@ -132,6 +141,30 @@ func (mongoCtx MongoContext) ReadAllUnsafeStats(query string) []Stat {
 func (mongoCtx MongoContext) InsertUnsafeStat(s Stat) {
 	doc := bson.M{"query": s.Query, "timestamp": s.Timestamp, "value": s.Value}
 	_, err := mongoCtx.UnsafeStats.InsertOne(mongoCtx.Ctx, doc)
+
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (mongoCtx MongoContext) ReadAllReports(query string) []Report {
+	filter := bson.M{"query": query}
+	cursor, err := mongoCtx.Reports.Find(mongoCtx.Ctx, filter)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var reports []Report
+
+	if err = cursor.All(context.TODO(), &reports); err != nil {
+		log.Fatal(err)
+	}
+	return reports
+}
+
+func (mongoCtx MongoContext) InsertReport(r Report) {
+	doc := bson.M{"_id": r.Id, "query": r.Query, "data": r.Data, "timestamp": r.Timestamp}
+	_, err := mongoCtx.Reports.InsertOne(mongoCtx.Ctx, doc)
 
 	if err != nil {
 		panic(err)

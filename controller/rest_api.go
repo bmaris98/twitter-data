@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -13,22 +14,16 @@ import (
 func SpawnServer() {
 	router := gin.Default()
 
-	// config := cors.Config{
-	// 	AllowAllOrigins: true,
-	// 	AllowMethods:    []string{"GET", "PATCH", "POST", "OPTIONS"},
-	// }
-	// config.AddAllowHeaders("*")
-
-	//router.Use(cors.New(config))
-
 	router.Use(cors.Default())
 
 	router.GET("/prompts", getAllPrompts)
 	router.POST("/prompts", createPrompt)
 	router.PATCH("/prompts/toggle", togglePrompt)
 	router.GET("/stats/unsafe/:query", getUnsafeStats)
+	router.GET("/stats/reports/:query", readReports)
 
 	router.POST("/hadoop/run/:query", runHadoopJob)
+	router.GET("/hadoop/finished/:query/:jobName", notifyFinishedJob)
 
 	router.Run("0.0.0.0:5321")
 }
@@ -69,4 +64,21 @@ func runHadoopJob(c *gin.Context) {
 	uuid := strings.Replace(uuid.New().String(), "-", "", -1)
 	ExecHadoopJob(query, uuid)
 	c.IndentedJSON(http.StatusOK, gin.H{"message": "Schedule successful"})
+}
+
+func notifyFinishedJob(c *gin.Context) {
+	query := c.Param("query")
+	jobName := c.Param("jobName")
+	content := hdfsConn.ReadFromFile(query, jobName)
+	report := Report{Query: query, Data: content, Id: jobName, Timestamp: time.Now().UnixNano()}
+
+	mongoCtx.InsertReport(report)
+	c.IndentedJSON(http.StatusOK, gin.H{"message": "Successful notification"})
+}
+
+func readReports(c *gin.Context) {
+	query := c.Param("query")
+	reports := mongoCtx.ReadAllReports(query)
+
+	c.IndentedJSON(http.StatusOK, reports)
 }

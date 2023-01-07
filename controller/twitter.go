@@ -66,15 +66,17 @@ func (data PostData) ToCsv() string {
 	return fmt.Sprintf("%s~|~%s~|~%s", strings.Join(data.Words, ","), strings.Join(data.Mentions, ","), strings.Join(data.ManualTags, ","))
 }
 
+func (data PostData) ToWordList() string {
+	allWords := append(append(data.Words, data.Mentions...), data.ManualTags...)
+	return strings.Join(allWords, " ")
+}
+
 func RunQuery(query string, lastReadId float64, client *http.Client, kafkaCtx KafkaContext, hdfsConn HdfsConnection) float64 {
-	// Create a new request using http
 	url := fmt.Sprintf(urlFormat, url.QueryEscape(query))
 	req, err := http.NewRequest("GET", url, nil)
 
-	// add authorization header to the req
 	req.Header.Add("Authorization", bearerHeader)
 
-	// Send req using http Client
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Println("Error on response.\n[ERROR] -", err)
@@ -101,20 +103,19 @@ func RunQuery(query string, lastReadId float64, client *http.Client, kafkaCtx Ka
 
 	postData := MapTweetsToPostData(searchResult)
 
-	lines := Map(postData, func(single PostData) string {
+	csvLines := Map(postData, func(single PostData) string {
 		return single.ToCsv()
 	})
-	csv := strings.Join(lines, "\n")
-
-	dirPath := fmt.Sprintf("%s/%s", tmpRoot, query)
-	err = os.MkdirAll(dirPath, 0777)
-	Check(err)
-	fileName := fmt.Sprintf("%s/%d.csv", dirPath, time.Now().UnixNano())
-	err = os.WriteFile(fileName, []byte(csv), 0777)
-	Check(err)
-	hdfsFileName := fmt.Sprintf("%d.csv", time.Now().UnixNano())
-	hdfsConn.CreateFile(query, hdfsFileName, csv)
+	csv := strings.Join(csvLines, "\n")
 	kafkaCtx.PushMsg(query, csv)
+
+	wordsLines := Map(postData, func(single PostData) string {
+		return single.ToWordList()
+	})
+	allWords := strings.Join(wordsLines, "\n")
+
+	hdfsFileName := fmt.Sprintf("%d.txt", time.Now().UnixNano())
+	hdfsConn.CreateFile(query, hdfsFileName, allWords)
 
 	return searchResult.GetMaximumId()
 }
